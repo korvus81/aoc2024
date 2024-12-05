@@ -23,10 +23,18 @@ test_lib = []
 
 # Template dependencies
 chrono = { version = "0.4.38", optional = true }
+crossterm = "0.28.1"
 dhat = { version = "0.3.3", optional = true }
 itertools = "0.13.0"
+nalgebra = "0.33.2"
+num = "0.4.3"
+petgraph = "0.6.5"
 pico-args = "0.5.0"
+rand = "0.8.5"
+ratatui = "0.29.0"
+rayon = "1.10.0"
 regex = "1.11.1"
+termcolor = "1.4.1"
 tinyjson = "2.5.1"
 
 # Solution dependencies

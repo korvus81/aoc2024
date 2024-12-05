@@ -155,7 +155,6 @@ const MAS_FWD: &'static str = "MAS";
 const MAS_BKWD: &'static str = "SAM";
 
 fn check_x(input: & Vec<Vec<char>>, row:usize,col:usize) -> bool {
-    println!("Checking x at row {}, col {}", row, col);
     let tl_to_br = get_coords(input, &[(row,col),(row+1,col+1),(row+2,col+2)]);
     let tr_to_bl = get_coords(input, &[(row,col+2),(row+1,col+1),(row+2,col)]);
     (tl_to_br == MAS_FWD || tl_to_br == MAS_BKWD) && (tr_to_bl == MAS_FWD || tr_to_bl == MAS_BKWD)
