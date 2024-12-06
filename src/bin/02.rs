@@ -17,7 +17,8 @@ pub fn part_one(input: &str) -> Option<u32> {
         .iter()
         .map(|levels| {
             (&levels[0..(levels.len() - 1)])
-                .iter().clone()
+                .iter()
+                .clone()
                 .zip(&levels[1..(levels.len())])
                 .map(|(first, second)| (*second - *first))
                 .fold((i32::MAX, i32::MIN), |(min_chg, max_chg), chg| {
@@ -33,14 +34,15 @@ pub fn part_one(input: &str) -> Option<u32> {
             let max_abs = max_chg.abs();
 
             if (min_abs >= 1 && min_abs <= 3)
-                && (max_abs >=1 && max_abs <= 3)
+                && (max_abs >= 1 && max_abs <= 3)
                 && ((*min_chg < 0 && *max_chg < 0) || (*min_chg > 0 && *max_chg > 0))
             {
                 1
             } else {
                 0
             }
-        }).collect_vec();
+        })
+        .collect_vec();
     println!("{:?}", tmp2);
     return Some(tmp2.iter().sum());
 }
@@ -57,14 +59,20 @@ pub fn part_two(input: &str) -> Option<u32> {
         .collect();
     let mut safe_report_counter = 0;
     for base_levels in tmp.iter() {
-        let mut possible_levels = (0..(base_levels.len() - 1)).map(|idx| { let (l1,l2) = base_levels.split_at(idx); [l1,&l2[1..]].concat()}).collect_vec();
+        let mut possible_levels = (0..(base_levels.len() - 1))
+            .map(|idx| {
+                let (l1, l2) = base_levels.split_at(idx);
+                [l1, &l2[1..]].concat()
+            })
+            .collect_vec();
         // I don't leave off the last one
         possible_levels.push(base_levels.clone()[0..(base_levels.len() - 1)].to_vec());
         possible_levels.push(base_levels.clone());
         println!("{:?}", possible_levels);
         if possible_levels.iter().any(|levels| {
             let (min_chg, max_chg) = (&levels[0..(levels.len() - 1)])
-                .iter().clone()
+                .iter()
+                .clone()
                 .zip(&levels[1..(levels.len())])
                 .map(|(first, second)| (*second - *first))
                 .fold((i32::MAX, i32::MIN), |(min_chg, max_chg), chg| {
@@ -81,8 +89,9 @@ pub fn part_two(input: &str) -> Option<u32> {
             } else {
                 false
             }
+        }) {
+            safe_report_counter += 1;
         }
-        ) {safe_report_counter += 1;}
     }
 
     return Some(safe_report_counter);
