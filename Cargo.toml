@@ -26,6 +26,7 @@ chrono = { version = "0.4.38", optional = true }
 crossterm = "0.28.1"
 dhat = { version = "0.3.3", optional = true }
 itertools = "0.13.0"
+memoize = "0.4.2"
 nalgebra = "0.33.2"
 num = "0.4.3"
 petgraph = "0.6.5"
