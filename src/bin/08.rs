@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use std::io::Write;
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 advent_of_code::solution!(8);
 
@@ -73,17 +73,19 @@ fn draw_map(mapdata: &Vec<Vec<char>>, coords: &HashSet<(isize, isize)>) {
         for x in 0..mapdata[y].len() {
             let ch = mapdata[y][x];
             match ch {
-                '.' => if coords.contains(&(x as isize, y as isize)) {
-                    stdout
-                        .set_color(ColorSpec::new().set_fg(Some(Color::Yellow)))
-                        .unwrap();
-                    write!(&mut stdout, "#").unwrap();
-                } else {
-                    stdout
-                        .set_color(ColorSpec::new().set_fg(Some(Color::White)))
-                        .unwrap();
-                    write!(&mut stdout, "{}", ch).unwrap();
-                },
+                '.' => {
+                    if coords.contains(&(x as isize, y as isize)) {
+                        stdout
+                            .set_color(ColorSpec::new().set_fg(Some(Color::Yellow)))
+                            .unwrap();
+                        write!(&mut stdout, "#").unwrap();
+                    } else {
+                        stdout
+                            .set_color(ColorSpec::new().set_fg(Some(Color::White)))
+                            .unwrap();
+                        write!(&mut stdout, "{}", ch).unwrap();
+                    }
+                }
 
                 _ => {
                     if coords.contains(&(x as isize, y as isize)) {
@@ -97,10 +99,8 @@ fn draw_map(mapdata: &Vec<Vec<char>>, coords: &HashSet<(isize, isize)>) {
                             .unwrap();
                         write!(&mut stdout, "{}", ch).unwrap();
                     }
-
                 }
             }
-
         }
         stdout.reset();
         writeln!(&mut stdout, "").unwrap();
@@ -137,7 +137,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                     [(x1, y1), (x2, y2)],
                     (x_dist, y_dist)
                 );
-                let mut poss_fwd = (x2 , y2 );
+                let mut poss_fwd = (x2, y2);
                 loop {
                     poss_fwd = (poss_fwd.0 + x_dist, poss_fwd.1 + y_dist);
                     if (poss_fwd.0 < 0
@@ -152,7 +152,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                         antinode_coords.insert(poss_fwd);
                     };
                 }
-                let mut poss_bwd = (x1 , y1 );
+                let mut poss_bwd = (x1, y1);
                 loop {
                     poss_bwd = (poss_bwd.0 - x_dist, poss_bwd.1 - y_dist);
                     if (poss_bwd.0 < 0

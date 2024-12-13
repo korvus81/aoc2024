@@ -10,3 +10,5 @@ time = "run --quiet --release -- time"
 
 [env]
 AOC_YEAR = "2024"
+BINDGEN_EXTRA_CLANG_ARGS = "-I/opt/homebrew/Cellar/z3/4.13.3/include/ -L/opt/homebrew/Cellar/z3/4.13.3/lib"
+LIBRARY_PATH = "/opt/homebrew/Cellar/z3/4.13.3/lib"

@@ -3,6 +3,7 @@ use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 //use std::rc::Rc;
+use disjoint::{DisjointSet, DisjointSetVec};
 
 advent_of_code::solution!(12);
 
@@ -56,31 +57,44 @@ impl Region {
 
     fn sides(&self) -> u64 {
         let mut sides_count = 0;
-        let mut exposed_l: HashSet<(i32,i32)> = HashSet::new();
-        let mut exposed_r: HashSet<(i32,i32)> = HashSet::new();
-        let mut exposed_u: HashSet<(i32,i32)> = HashSet::new();
-        let mut exposed_d: HashSet<(i32,i32)> = HashSet::new();
+        let mut exposed_l: HashSet<(i32, i32)> = HashSet::new();
+        let mut exposed_r: HashSet<(i32, i32)> = HashSet::new();
+        let mut exposed_u: HashSet<(i32, i32)> = HashSet::new();
+        let mut exposed_d: HashSet<(i32, i32)> = HashSet::new();
 
         for (x, y) in self.coords.iter() {
             //let mut exposed_sides = 0u64;
             if !self.coords.contains(&(*x - 1, *y)) {
-                exposed_l.insert((*x,*y));
+                exposed_l.insert((*x, *y));
             }
             if !self.coords.contains(&(*x + 1, *y)) {
-                exposed_r.insert((*x,*y));
+                exposed_r.insert((*x, *y));
             }
             if !self.coords.contains(&(*x, *y - 1)) {
-                exposed_u.insert((*x,*y));
+                exposed_u.insert((*x, *y));
             }
             if !self.coords.contains(&(*x, *y + 1)) {
-                exposed_d.insert((*x,*y));
+                exposed_d.insert((*x, *y));
             }
         }
         for xset in [exposed_l, exposed_r] {
-            let xvals = xset.iter().map(|(x,_y)| *x).sorted().unique().collect_vec();
+            let xvals = xset
+                .iter()
+                .map(|(x, _y)| *x)
+                .sorted()
+                .unique()
+                .collect_vec();
             for xv in xvals {
-                let yvals = xset.iter().filter(|(x,_y)| *x==xv).map(|(_x,y)| *y).sorted().unique().collect_vec();
-                if yvals.len() == 0 { continue; }
+                let yvals = xset
+                    .iter()
+                    .filter(|(x, _y)| *x == xv)
+                    .map(|(_x, y)| *y)
+                    .sorted()
+                    .unique()
+                    .collect_vec();
+                if yvals.len() == 0 {
+                    continue;
+                }
                 let mut lastyv = -100;
                 for yv in yvals {
                     if yv.abs_diff(lastyv) == 1 {
@@ -94,10 +108,23 @@ impl Region {
             }
         }
         for yset in [exposed_u, exposed_d] {
-            let yvals = yset.iter().map(|(_x,y)| *y).sorted().unique().collect_vec();
+            let yvals = yset
+                .iter()
+                .map(|(_x, y)| *y)
+                .sorted()
+                .unique()
+                .collect_vec();
             for yv in yvals {
-                let xvals = yset.iter().filter(|(_x,y)| *y==yv).map(|(x,_y)| *x).sorted().unique().collect_vec();
-                if xvals.len() == 0 { continue; }
+                let xvals = yset
+                    .iter()
+                    .filter(|(_x, y)| *y == yv)
+                    .map(|(x, _y)| *x)
+                    .sorted()
+                    .unique()
+                    .collect_vec();
+                if xvals.len() == 0 {
+                    continue;
+                }
                 let mut lastxv = -100;
                 for xv in xvals {
                     if xv.abs_diff(lastxv) == 1 {
@@ -126,47 +153,68 @@ impl Hash for Region {
     }
 }
 
-// pub fn part_one(input: &str) -> Option<u64> {
-//     let garden : Vec<Vec<char>>  = input.trim().lines().map(|ln| ln.chars().collect_vec()).collect_vec();
-//     let mut coords_to_region: HashMap<(i32, i32), Rc<RefCell<&mut Region>>> = HashMap::new();
-//     let mut all_regions: HashSet<Rc<RefCell<&mut Region>>> = HashSet::new();
-//     for y in 0..garden.len() {
-//         for x in 0..garden[y].len() {
-//             let val = garden[y][x];
-//             //let mut maybe_region: Option<&mut Region> = None;;
-//             let xval = x as i32;
-//             let yval = y as i32;
-//             let mut region = if y > 0 && garden[y - 1][x] == val {
-//                 Rc::clone(coords_to_region.get(&(xval,yval-1)).unwrap())
-//                 //*coords_to_region.get_mut(&(xval,yval-1)).unwrap()
-//             } else if x > 0 && garden[y][x-1] == val {
-//                 Rc::clone(coords_to_region.get(&(xval-1,yval)).unwrap())
-//                 //*coords_to_region.get_mut(&(xval-1,yval)).unwrap()
-//             } else {
-//                 Rc::new(RefCell::new(&mut Region::new()))
-//             };
-//             // let mut region = match maybe_region {
-//             //     Some(r) => r,
-//             //     None => &Region::new(),
-//             // };
-//             {
-//                 let mut r = (*region).borrow_mut();
-//                 (*r).add((xval, yval));
-//             }
-//             coords_to_region.insert((xval,yval), region.clone());
-//             all_regions.insert(region);
-//
-//         }
-//     }
-//     let mut total_cost = 0u64;
-//     for &region in all_regions.iter() {
-//         println!("Region {:?}: {}", region, region.cost());
-//         total_cost += region.cost();
-//     }
-//     Some(total_cost)
-// }
-
 pub fn part_one(input: &str) -> Option<u64> {
+    let garden: Vec<Vec<char>> = input
+        .trim()
+        .lines()
+        .map(|ln| ln.chars().collect_vec())
+        .collect_vec();
+    let mut coords_to_region: HashMap<(i32, i32), usize> = HashMap::new();
+    let mut all_regions: Vec<Region> = vec![];
+    let mut val_to_coords: HashMap<char, HashSet<(i32, i32)>> = HashMap::new();
+    for y in 0..garden.len() {
+        for x in 0..garden[y].len() {
+            let val = garden[y][x];
+            //let mut maybe_region: Option<&mut Region> = None;;
+            let xval = x as i32;
+            let yval = y as i32;
+            val_to_coords
+                .entry(val)
+                .or_insert_with(HashSet::new)
+                .insert((xval, yval));
+        }
+    }
+    for (val, coords) in val_to_coords.iter() {
+        let mut dset: DisjointSetVec<(i32, i32)> = DisjointSetVec::with_capacity(coords.len());
+        for (x, y) in coords.iter() {
+            dset.push((*x, *y));
+        }
+
+        let mut changed = true;
+        while changed {
+            changed = false;
+            for i in 0..dset.len() - 1 {
+                for j in i + 1..dset.len() {
+                    // if they aren't joined in a set, and they
+                    if !dset.is_joined(i, j)
+                        && (dset[i].0.abs_diff(dset[j].0) + dset[i].1.abs_diff(dset[j].1)) == 1
+                    {
+                        dset.join(i, j);
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        println!("Post-merges {:?} -> sets: {:?}", val, dset);
+        for s in dset {
+            let mut r = Region::new();
+            for (x, y) in s.iter() {
+                r.add((*x, *y));
+            }
+            all_regions.push(r);
+        }
+    }
+
+    let mut total_cost = 0u64;
+    for region in all_regions.iter() {
+        println!("Region {:?}: {}", region, region.cost());
+        total_cost += region.cost();
+    }
+    Some(total_cost)
+}
+
+pub fn part_one_old(input: &str) -> Option<u64> {
     let garden: Vec<Vec<char>> = input
         .trim()
         .lines()

@@ -225,19 +225,24 @@ pub fn part_two(input: &str) -> Option<u32> {
     let (guard_x, guard_y, guard_dir) = get_guard(&board);
     draw_board(&board);
 
-    let (visited,is_loop) = get_visited_list(&board, guard_x.clone(), guard_y.clone(), guard_dir.clone());
+    let (visited, is_loop) =
+        get_visited_list(&board, guard_x.clone(), guard_y.clone(), guard_dir.clone());
     assert!(!is_loop);
 
-    let mut possible_location_count:u32 = 0;
-    for (i,(vis_x,vis_y)) in visited.iter().enumerate() {
+    let mut possible_location_count: u32 = 0;
+    for (i, (vis_x, vis_y)) in visited.iter().enumerate() {
         //println!("[{}] @ ({},{})", i, vis_x,vis_y);
-        let new_board = board_with_obstacle(&board,*vis_x as usize,*vis_y as usize);
-        let (v2, is_loop2) = get_visited_list(&new_board, guard_x.clone(), guard_y.clone(), guard_dir.clone());
+        let new_board = board_with_obstacle(&board, *vis_x as usize, *vis_y as usize);
+        let (v2, is_loop2) = get_visited_list(
+            &new_board,
+            guard_x.clone(),
+            guard_y.clone(),
+            guard_dir.clone(),
+        );
         if is_loop2 {
             possible_location_count += 1;
         }
     }
-
 
     Some(possible_location_count)
 }

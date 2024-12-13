@@ -179,7 +179,7 @@ pub fn part_two(input: &str) -> Option<u64> {
                     blocks = blocks
                         .iter()
                         //.filter(|x| x.0 != Some(fnum))
-                        .map(|x| if x.0 == Some(fnum) { (None,x.1) } else {*x})
+                        .map(|x| if x.0 == Some(fnum) { (None, x.1) } else { *x })
                         .collect();
                     // put it in place of the empty space
                     blocks[i] = (Some(fnum), fileblocklen);
