@@ -115,8 +115,6 @@ fn solve_game2(game: Game) -> (u64, bool) {
 
     let a_presses = Int::new_const(&ctx, "a_presses");
     let b_presses = Int::new_const(&ctx, "b_presses");
-    let a_cost = Int::from_u64(&ctx, 3);
-    let b_cost = Int::from_u64(&ctx, 1);
     let a_x_dist = Int::from_u64(&ctx, game.button_a.0);
     let a_y_dist = Int::from_u64(&ctx, game.button_a.1);
     let b_x_dist = Int::from_u64(&ctx, game.button_b.0);
