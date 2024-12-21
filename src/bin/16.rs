@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use pathfinding::prelude::{astar, yen};
+use std::collections::HashSet;
 
 advent_of_code::solution!(16);
 
@@ -127,13 +127,15 @@ pub fn part_two(input: &str) -> Option<u32> {
         16,
     );
     let best_cst = res[0].1;
-    let best_results = res.iter().filter(|(pth,cst)| *cst == best_cst).collect::<Vec<_>>();
+    let best_results = res
+        .iter()
+        .filter(|(pth, cst)| *cst == best_cst)
+        .collect::<Vec<_>>();
     println!("Number of minimum-cost paths: {:?}", best_results.len());
-    let mut positions : HashSet<(usize,usize)> = HashSet::new();
+    let mut positions: HashSet<(usize, usize)> = HashSet::new();
     for r in best_results {
-
-        for (x,y,_) in (*r).0.iter() {
-            positions.insert((*x,*y));
+        for (x, y, _) in (*r).0.iter() {
+            positions.insert((*x, *y));
         }
     }
 

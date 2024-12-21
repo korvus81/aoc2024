@@ -231,11 +231,28 @@ fn make_move2(
                     (new_map, robot_x, robot_y)
                 } else if new_map[y as usize][x as usize] == '.' {
                     if d == Dir::Right {
-                        println!("Dir:{:?} robot_y2:{} row={:?}, src={:?} dst={:?}",d,robot_y2, new_map[robot_y2 as usize], robot_x2 as usize..x as usize, robot_x2+1);
-                        new_map[robot_y2 as usize].copy_within(robot_x2 as usize..x as usize, (robot_x2+1) as usize);
-                    } else { // d == Dir::Left
-                        println!("Dir:{:?} robot_y2:{} row={:?}, src={:?} dst={:?}",d,robot_y2, new_map[robot_y2 as usize], (x+1) as usize..=robot_x2 as usize, x);
-                        new_map[robot_y2 as usize].copy_within((x+1) as usize..=robot_x2 as usize, x as usize);
+                        println!(
+                            "Dir:{:?} robot_y2:{} row={:?}, src={:?} dst={:?}",
+                            d,
+                            robot_y2,
+                            new_map[robot_y2 as usize],
+                            robot_x2 as usize..x as usize,
+                            robot_x2 + 1
+                        );
+                        new_map[robot_y2 as usize]
+                            .copy_within(robot_x2 as usize..x as usize, (robot_x2 + 1) as usize);
+                    } else {
+                        // d == Dir::Left
+                        println!(
+                            "Dir:{:?} robot_y2:{} row={:?}, src={:?} dst={:?}",
+                            d,
+                            robot_y2,
+                            new_map[robot_y2 as usize],
+                            (x + 1) as usize..=robot_x2 as usize,
+                            x
+                        );
+                        new_map[robot_y2 as usize]
+                            .copy_within((x + 1) as usize..=robot_x2 as usize, x as usize);
                     }
                     new_map[robot_y2 as usize][robot_x2 as usize] = '@'; // new position
                     new_map[robot_y as usize][robot_x as usize] = '.'; // old position
@@ -245,16 +262,17 @@ fn make_move2(
                     println!("Unknown case ({}) from running into O {} @ (x:{}, y:{}) (robot at x:{}, y:{})", new_map[y as usize][x as usize], mv, robot_x2, robot_y2, robot_x, robot_y);
                     unreachable!()
                 }
-            } else { // Up or Down
+            } else {
+                // Up or Down
                 // TODO: this is the hard part.  Maybe a recursive function that will tell me all the moves that will happen for the left and right side of the box?
                 let (mut box_x, mut box_y) = (robot_x2, robot_y2);
                 if new_map[robot_y2 as usize][robot_x2 as usize] == ']' {
                     // box_x should be the left side of the box
                     // if we are interacting with the right side, reduce box_x by 1
-                    box_x = box_x-1;
+                    box_x = box_x - 1;
                 }
                 if can_move_box(&new_map, box_x, box_y, d) {
-                    println!("Can move box at x={},y={}, d={:?}",box_x, box_y, d);
+                    println!("Can move box at x={},y={}, d={:?}", box_x, box_y, d);
                     move_a_box(&mut new_map, box_x, box_y, d);
                     new_map[robot_y2 as usize][robot_x2 as usize] = '@'; // new position
                     new_map[robot_y as usize][robot_x as usize] = '.'; // old position
@@ -277,95 +295,136 @@ fn make_move2(
 fn can_move_box(map: &Vec<Vec<char>>, box_x: isize, box_y: isize, d: Dir) -> bool {
     // double check we didn't screw something up
     assert_eq!(map[box_y as usize][box_x as usize], '[');
-    assert_eq!(map[box_y as usize][box_x as usize+1], ']');
-    let (next_x_left,next_y) = d.next_pos(box_x,box_y,1);
+    assert_eq!(map[box_y as usize][box_x as usize + 1], ']');
+    let (next_x_left, next_y) = d.next_pos(box_x, box_y, 1);
     let next_x_right = next_x_left + 1;
-    if map[next_y as usize][next_x_left as usize] == '.' && map[next_y as usize][next_x_right as usize] == '.' {
+    if map[next_y as usize][next_x_left as usize] == '.'
+        && map[next_y as usize][next_x_right as usize] == '.'
+    {
         return true; // all open space
     }
-    if map[next_y as usize][next_x_left as usize] == '#' || map[next_y as usize][next_x_right as usize] == '#' {
+    if map[next_y as usize][next_x_left as usize] == '#'
+        || map[next_y as usize][next_x_right as usize] == '#'
+    {
         return false; // at least one wall in the way
     }
-    if map[next_y as usize][next_x_left as usize] == '[' && map[next_y as usize][next_x_right as usize] == ']' { // shouldn't need second condition
-        println!("Box (found left side below left) at x={},y={}, checking if it can move {:?}",next_x_left,next_y,d);
+    if map[next_y as usize][next_x_left as usize] == '['
+        && map[next_y as usize][next_x_right as usize] == ']'
+    {
+        // shouldn't need second condition
+        println!(
+            "Box (found left side below left) at x={},y={}, checking if it can move {:?}",
+            next_x_left, next_y, d
+        );
         return can_move_box(&map, next_x_left, next_y, d);
     }
-    if map[next_y as usize][next_x_left as usize] == ']'  {
-        println!("Box (found right side below left) at x={},y={}, checking if it can move {:?}",next_x_left-1,next_y,d);
-        let left_ok =  can_move_box(&map, next_x_left-1, next_y, d); // all open space
-        let right_ok = map[next_y as usize][next_x_right as usize] == '.' || (map[next_y as usize][next_x_right as usize] == '[' &&  can_move_box(&map, next_x_right, next_y, d));
+    if map[next_y as usize][next_x_left as usize] == ']' {
+        println!(
+            "Box (found right side below left) at x={},y={}, checking if it can move {:?}",
+            next_x_left - 1,
+            next_y,
+            d
+        );
+        let left_ok = can_move_box(&map, next_x_left - 1, next_y, d); // all open space
+        let right_ok = map[next_y as usize][next_x_right as usize] == '.'
+            || (map[next_y as usize][next_x_right as usize] == '['
+                && can_move_box(&map, next_x_right, next_y, d));
         return left_ok && right_ok;
     }
-    if map[next_y as usize][next_x_left as usize] == '.' && map[next_y as usize][next_x_right as usize] == '[' {
-        println!("Box (found left side below right) at x={},y={}, checking if it can move {:?}",next_x_right, next_y,d);
+    if map[next_y as usize][next_x_left as usize] == '.'
+        && map[next_y as usize][next_x_right as usize] == '['
+    {
+        println!(
+            "Box (found left side below right) at x={},y={}, checking if it can move {:?}",
+            next_x_right, next_y, d
+        );
         return can_move_box(&map, next_x_right, next_y, d);
     }
-    println!("ch found: {:?} next_y={}, next_x_left={}", map[next_y as usize][next_x_left as usize], next_y, next_x_left);
+    println!(
+        "ch found: {:?} next_y={}, next_x_left={}",
+        map[next_y as usize][next_x_left as usize], next_y, next_x_left
+    );
     unreachable!(); // I think this is true
 }
 
 fn move_a_box(map: &mut Vec<Vec<char>>, box_x: isize, box_y: isize, d: Dir) -> bool {
     // double check we didn't screw something up
     assert_eq!(map[box_y as usize][box_x as usize], '[');
-    assert_eq!(map[box_y as usize][box_x as usize+1], ']');
-    let (next_x_left,next_y) = d.next_pos(box_x,box_y,1);
+    assert_eq!(map[box_y as usize][box_x as usize + 1], ']');
+    let (next_x_left, next_y) = d.next_pos(box_x, box_y, 1);
     let next_x_right = next_x_left + 1;
-    println!("Moving box @ x={},y={} -> next_x_left = {}..right={}, next_y={}, d={:?}",box_x,box_y,next_x_left,next_x_right,next_y, d);
+    println!(
+        "Moving box @ x={},y={} -> next_x_left = {}..right={}, next_y={}, d={:?}",
+        box_x, box_y, next_x_left, next_x_right, next_y, d
+    );
 
-    if map[next_y as usize][next_x_left as usize] == '#' || map[next_y as usize][next_x_right as usize] == '#' {
+    if map[next_y as usize][next_x_left as usize] == '#'
+        || map[next_y as usize][next_x_right as usize] == '#'
+    {
         unreachable!();
         return false; // at least one wall in the way
     }
-    if map[next_y as usize][next_x_left as usize] == '[' && map[next_y as usize][next_x_right as usize] == ']' { // shouldn't need second condition
-        if can_move_box(&mut *map, next_x_left, next_y, d) { // all open space
+    if map[next_y as usize][next_x_left as usize] == '['
+        && map[next_y as usize][next_x_right as usize] == ']'
+    {
+        // shouldn't need second condition
+        if can_move_box(&mut *map, next_x_left, next_y, d) {
+            // all open space
             move_a_box(&mut *map, next_x_left, next_y, d);
             map[next_y as usize][next_x_left as usize] = '[';
             map[next_y as usize][next_x_right as usize] = ']';
             map[box_y as usize][box_x as usize] = '.';
-            map[box_y as usize][box_x as usize+1] = '.';
+            map[box_y as usize][box_x as usize + 1] = '.';
             return true;
         }
     }
-    if map[next_y as usize][next_x_left as usize] == ']'  {
-        let left_ok =  can_move_box(&map, next_x_left-1, next_y, d); // all open space
+    if map[next_y as usize][next_x_left as usize] == ']' {
+        let left_ok = can_move_box(&map, next_x_left - 1, next_y, d); // all open space
         if left_ok && map[next_y as usize][next_x_right as usize] == '.' {
-            move_a_box(&mut *map, next_x_left-1, next_y, d);
+            move_a_box(&mut *map, next_x_left - 1, next_y, d);
             map[next_y as usize][next_x_left as usize] = '[';
             map[next_y as usize][next_x_right as usize] = ']';
             map[box_y as usize][box_x as usize] = '.';
-            map[box_y as usize][box_x as usize+1] = '.';
+            map[box_y as usize][box_x as usize + 1] = '.';
             return true;
-        } else if left_ok && (map[next_y as usize][next_x_right as usize] == '[' &&  can_move_box(&map, next_x_right, next_y, d)) {
-            move_a_box(&mut *map, next_x_left-1, next_y, d);
+        } else if left_ok
+            && (map[next_y as usize][next_x_right as usize] == '['
+                && can_move_box(&map, next_x_right, next_y, d))
+        {
+            move_a_box(&mut *map, next_x_left - 1, next_y, d);
             move_a_box(&mut *map, next_x_right, next_y, d);
             map[next_y as usize][next_x_left as usize] = '[';
             map[next_y as usize][next_x_right as usize] = ']';
             map[box_y as usize][box_x as usize] = '.';
-            map[box_y as usize][box_x as usize+1] = '.';
+            map[box_y as usize][box_x as usize + 1] = '.';
             return true;
         } else {
             unreachable!();
             return false;
         }
     }
-    if map[next_y as usize][next_x_left as usize] == '.' && map[next_y as usize][next_x_right as usize] == '[' {
+    if map[next_y as usize][next_x_left as usize] == '.'
+        && map[next_y as usize][next_x_right as usize] == '['
+    {
         if can_move_box(&map, next_x_right, next_y, d) {
             move_a_box(&mut *map, next_x_right, next_y, d);
             map[next_y as usize][next_x_left as usize] = '[';
             map[next_y as usize][next_x_right as usize] = ']';
             map[box_y as usize][box_x as usize] = '.';
-            map[box_y as usize][box_x as usize+1] = '.';
+            map[box_y as usize][box_x as usize + 1] = '.';
             return true;
         } else {
             unreachable!();
             return false;
         }
     }
-    if map[next_y as usize][next_x_left as usize] == '.' && map[next_y as usize][next_x_right as usize] == '.' {
+    if map[next_y as usize][next_x_left as usize] == '.'
+        && map[next_y as usize][next_x_right as usize] == '.'
+    {
         map[next_y as usize][next_x_left as usize] = '[';
         map[next_y as usize][next_x_right as usize] = ']';
         map[box_y as usize][box_x as usize] = '.';
-        map[box_y as usize][box_x as usize+1] = '.';
+        map[box_y as usize][box_x as usize + 1] = '.';
         return true; // all open space
     }
 
@@ -389,8 +448,6 @@ fn map_is_valid(map: &Vec<Vec<char>>) -> bool {
             } else if saw_left_bracket_last {
                 return false;
             }
-
-
         }
     }
     true

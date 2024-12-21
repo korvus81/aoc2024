@@ -3,19 +3,27 @@ advent_of_code::solution!(18);
 use itertools::Itertools;
 use pathfinding::prelude::{astar, yen};
 
-fn get_succ(x: usize, y: usize, map: &Vec<Vec<char>>) -> Vec<((usize, usize),u32)> {
-    let mut res: Vec<((usize,usize),u32)> = vec![];
+fn get_succ(x: usize, y: usize, map: &Vec<Vec<char>>) -> Vec<((usize, usize), u32)> {
+    let mut res: Vec<((usize, usize), u32)> = vec![];
     if x > 0 {
-        if map[y][x - 1] == '.' { res.push(((x-1,y),1)); };
+        if map[y][x - 1] == '.' {
+            res.push(((x - 1, y), 1));
+        };
     }
     if y > 0 {
-        if map[y-1][x] == '.' { res.push(((x,y-1),1)); };
+        if map[y - 1][x] == '.' {
+            res.push(((x, y - 1), 1));
+        };
     }
-    if x < map[y].len()-1 {
-        if map[y][x+1] == '.' { res.push(((x+1,y),1)); };
+    if x < map[y].len() - 1 {
+        if map[y][x + 1] == '.' {
+            res.push(((x + 1, y), 1));
+        };
     }
-    if y < map.len()-1 {
-        if map[y+1][x] == '.' { res.push(((x,y+1),1)); };
+    if y < map.len() - 1 {
+        if map[y + 1][x] == '.' {
+            res.push(((x, y + 1), 1));
+        };
     }
     res
 }
@@ -35,7 +43,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     let END_X = MAX_X;
     let END_Y = MAX_Y;
     let mut map = vec![vec!['.'; (MAX_X + 1) as usize]; (MAX_Y + 1) as usize];
-    println!("MAX_X: {}",MAX_X);
+    println!("MAX_X: {}", MAX_X);
     let STEPS = if MAX_X == 6 { 12 } else { 1024 };
     for (x, y) in &coords[0..STEPS] {
         map[*y][*x] = '#';
@@ -53,7 +61,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         |(x, y)| *x == END_X && *y == END_Y,
     )
     .unwrap();
-    println!("res: {:?}",res);
+    println!("res: {:?}", res);
     Some(res.1 as u32)
 }
 
@@ -72,7 +80,7 @@ pub fn part_two(input: &str) -> Option<String> {
     let END_X = MAX_X;
     let END_Y = MAX_Y;
     let mut map = vec![vec!['.'; (MAX_X + 1) as usize]; (MAX_Y + 1) as usize];
-    println!("MAX_X: {}",MAX_X);
+    println!("MAX_X: {}", MAX_X);
 
     for (x, y) in coords {
         map[y][x] = '#';
@@ -89,15 +97,11 @@ pub fn part_two(input: &str) -> Option<String> {
                 }
                 println!("");
             }
-            println!("x,y: {},{}",x,y);
-            return Some(format!("{},{}",x,y))
+            println!("x,y: {},{}", x, y);
+            return Some(format!("{},{}", x, y));
         }
     }
     None
-
-
-
-
 }
 
 #[cfg(test)]

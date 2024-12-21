@@ -44,8 +44,11 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(count)
 }
 
-
-fn ways_to_match<'a>(towels_by_first_stripe: &HashMap<char, Vec<&str>>, cache: &mut HashMap<&'a str, u64>, pattern: &'a str) -> u64 {
+fn ways_to_match<'a>(
+    towels_by_first_stripe: &HashMap<char, Vec<&str>>,
+    cache: &mut HashMap<&'a str, u64>,
+    pattern: &'a str,
+) -> u64 {
     let first_ch = pattern.chars().nth(0).unwrap();
     let mut ways = 0u64;
     //println!("  Pattern: {:?}", pattern);
@@ -79,7 +82,7 @@ pub fn part_two(input: &str) -> Option<u64> {
     let mut cache: HashMap<&str, u64> = HashMap::new();
     let mut count = 0u64;
     for pattern in patterns {
-        println!("{:?}  ({})", pattern,count);
+        println!("{:?}  ({})", pattern, count);
         count += ways_to_match(&towels_by_first_stripe, &mut cache, pattern);
     }
     Some(count)

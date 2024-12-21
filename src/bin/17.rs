@@ -1,4 +1,4 @@
-// part 2 was a disaster.  See d17.py in the root for part of what I used to get the result.  
+// part 2 was a disaster.  See d17.py in the root for part of what I used to get the result.
 
 use itertools::Itertools;
 use std::cmp::min;
@@ -335,8 +335,12 @@ pub fn part_two(input: &str) -> Option<u64> {
 
         let mut matched = false;
         if output.len() == program.len() {
-            println!("{} =? {}", output[output.len()-1-digit], program[program.len()-1-digit]);
-            if output[output.len()-1-digit] == program[program.len()-1-digit] {
+            println!(
+                "{} =? {}",
+                output[output.len() - 1 - digit],
+                program[program.len() - 1 - digit]
+            );
+            if output[output.len() - 1 - digit] == program[program.len() - 1 - digit] {
                 matched = true;
                 println!("incrementing digit");
                 digit = digit + 1;
@@ -346,7 +350,6 @@ pub fn part_two(input: &str) -> Option<u64> {
         if !matched {
             digits[digit] = (digits[digit] + 1) % 8;
         }
-
     }
     // 109019476330651 from python code with bit manipulation
     // 35519602255915
